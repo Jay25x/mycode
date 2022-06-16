@@ -1,0 +1,81 @@
+!/user/bin/env python3
+
+questions = \
+{
+    "Which Member acted in the film Ghost Dog and solo debut album is titled Bobby Digital in Stereo ?": {
+        "A": "U God ",
+        "B": "RZA",
+        "C": "GZA",
+        "D": "ODB"
+    },
+    "Who raps the first verse on Protect Ya Neck? ": {
+        "A": "RZA",
+        "B": "Method Man",
+        "C": "Inspectah Deck",
+        "D": "ODB"
+    },
+    "Which member has the most features on Raekwon Only Built 4 Cuban Linx? ": {
+        "A": "Ghostface Killah",
+        "B": "Masta Killa",
+        "C": "Method Man",
+        "D": "GZA"
+    },
+    "Which member went by the stage name The Genius prior to Wu Tang Clan? ": {
+        "A": "Cappadonna",
+        "B": "GZA",
+        "C": "Raekwon",
+        "D": "Inspectah Deck"
+    },
+    "This member did not appear on any Wu Tang project until 1995 ": {
+        "A": "Cappadonna",
+        "B": "U God ",
+        "C": "Masta Killa",
+        "D": "ODB"
+    },
+    "Wu-Massacre was a collaboration album made Method Man Ghostface Killah and this member?": {
+        "A": "GZA",
+        "B": "Inspectah Deck",
+        "C": "Raekwon",
+        "D": "Masta Killah"
+    },
+    "They were the final offical member to join the group and were metored by GZA?": {
+        "A": "U God",
+        "B": "ODB",
+        "C": "RZA",
+        "D": "Masta Killah"
+     },
+     "Which member signed with Roc-A-Fella Records in 2003?": {
+        "A": "Method Man",
+        "B": "Raekwon",
+        "C": "RZA",
+        "D": "ODB"
+      },
+      "Raw My Journey Into The WU-Tang is an autobiography released in 2018 by who?": {
+        "A": "GZA",
+        "B": "RZA",
+        "C": "ODB",
+        "D": "U God"
+     },
+     "Won a Grammy Award in 1996 for his song with Mary J Bilge?": {
+       "A": "Method Man",
+       "B": "Raekwon",
+       "C": "Inspectah Deck",
+       "D": "ODB"
+    }
+}
+
+print("\nWU Tang Clan Quiz")
+prompt = ">>> "
+correct_options = ['B', 'C', 'A', 'B', 'A', 'C', 'D', 'D', 'D', 'A']
+score_count = 0
+
+for correct_option, (question, options) in zip(correct_options, questions.items()):
+    print("\n", question, "\n")
+    for option, answer in options.items():
+        print(option, ":", answer)
+    print("\nWhat's your answer?")
+    choice = str(input(prompt))
+    if choice.upper() == correct_option:
+        score_count = score_count + 1
+print(score_count)
+~                                
