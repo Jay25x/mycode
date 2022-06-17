@@ -1,0 +1,78 @@
+#!/usr/bin/env python3 
+
+import choosewisely.py
+import sys
+import time
+import os
+delay = 0.5
+
+
+def game():
+
+    import random
+
+    answer= input ("Would you like to play a game ? (y/n): ")
+
+    if answer.lower()=="y": #Starts Game if y 
+        print()
+        print("         #######################")
+        print("         #                     #")
+        print("         #      WELCOME To     #")
+        print("         #   The City of Wind  #")
+        print("         #                     #")
+        print("         #######################")
+        start=True
+        inventory=[]
+    else:
+        print("okay, some other time") # Game does not start
+
+    if start==True:
+        print()
+        print("Random Person: Hello Strange traveler, I see that you are new here.")
+        print("Random Person: Welcome to Chicagoland. Where you must avoid the Nitti.")
+        print("Random Person: Right now we have to keep you alive and out of the Jolly.")
+        choice= input("Do You want my help? (y/n): ")
+        time.sleep(delay)
+
+    if choice.lower()=="y":
+        choice=True
+        print()
+        time.sleep(delay)
+        print("Random Person:Great! My name is Johnny 5 by the way")
+        print("New Item ------Johnny 5 gives you bike---")
+        print("You ride off with Johnny 5 into the sunset")
+        print("Not much of adventure. bet you thought you were suppose say yes Huh")
+        inventory.append("bike")
+
+    else:
+        choice=False
+        print()
+        print("Random Person: Cool man well hey at least take this wayto for your trouble")
+        print("Random Person: Take Care and make sure to avoid The Nitti")
+        print("New Item ------You were given a wayto-------")
+        inventory.append("wayto")
+
+        if choice==False and "wayto" in inventory:
+            print()
+            print("wayto tells you to go right but you hear a noise ahead of you")
+            decide= input(" Listen to wayto or follow Sound (Wayto/follow): ? ")
+
+        if decide.lower() == "follow":
+            print()
+            print("You follow the sound only to realize it's a Nitti pretending to be a child")
+            print()
+            print("GAMEOVER! Have You Learned Nothing From Horror Films")
+        elif decide.lower()== "wayto":
+            print()
+            print("You follow the directions given by the wayto and it leads you to a door")
+            building1= input ("Do you enter the old building or look around? (enter/look): ")
+
+            if building1.lower() == "enter":
+                print()
+                print("You enter")#Ideally this is where I would call in the second code to run 
+            else:
+                print()
+                print("You decided to look around only to fall into a trap")
+                print("Gameover! The Nitti will surely be here soon. Sometimes the old house is safer")
+
+game ()
