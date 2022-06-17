@@ -1,0 +1,63 @@
+from turtle import Screen  # allows for import of image to screen##
+import pygame  # enables visuals##
+from fighter import Fighter  # brings in fighters ferom fighter file##
+
+pygame.init()  # creates an instances of pygame##
+
+##Creates Game Window Size##
+SCREEN_WIDTH = 1000
+SCREEN_Height = 800
+
+##Screen Title & Display##
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_Height))
+pygame.display.set_caption("Brawler")
+
+##Framerate Setting##
+clock = pygame.time.Clock()
+FPS = 60  # FramesPerSecond##
+
+##Background Image load in and \\ to prevent error when pulling in iamge##
+bg_image = pygame.image.load(
+    "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\images\\backgrounds\\background.jpg").convert_alpha()
+
+
+##Background Drawing Function##
+def draw_bg():
+    ## Resize Iamge to fit window size##
+    scaled_bg = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_Height))
+    screen.blit(scaled_bg, (0, 0))
+
+
+## Creates Fighters ##
+fighter_1 = Fighter(200, 550)
+fighter_2 = Fighter(700, 550)
+
+##game loop that keep screen from closing##
+run = True
+while run:
+
+    ##Calling In FPS##
+    clock.tick(FPS)
+
+    ##Background Drawing##
+    draw_bg()
+
+    ##Fighters Movements##
+    # Calls in Move Function##
+    fighter_1.move(SCREEN_WIDTH, SCREEN_Height)
+    # fighter_2.move()
+
+    ## drawing of fighters passing them into surface##
+    fighter_1.draw(screen)
+    fighter_2.draw(screen)
+
+    # event handler
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    # update display
+    pygame.display.update()
+
+# Exit Pygame
+pygame.quit()
