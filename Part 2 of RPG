@@ -1,0 +1,109 @@
+import time  # Allow usage of Time Mod#
+
+delay = 0.5  # Timesleep setting
+
+
+def win():
+    time.sleep(delay)
+    print("Way to Go! You found the Hidden Passage! Come back in 10 years for the sequel where it will be a cash grab full of meaningless DLC and pointly skins")
+
+
+def kill():
+    time.sleep(delay)
+    print("Look like you got got by a hidden Nitti, You Have Died! You Lose!")
+
+
+def dinningroom():
+    time.sleep(delay)
+    room_builder([False, True], "dinningroom", False, ["kill", "kitchen"])
+
+def kitchen():
+    time.sleep(delay)
+    room_builder([False, True], "The Kitchen", False, ["kill", "diningroom"])
+
+
+def bedroom():
+    time.sleep(delay)
+    room_builder([True, False, True], "The Bedroom",
+                 False, ["nursey", "kill", "bathroom"])
+
+
+def nursey():
+    time.sleep(delay)
+    room_builder([True, False, True], "The Nursey",
+                 True, ["bedroom", "kill", "win"])
+
+
+def bathroom():
+    time.sleep(delay)
+    room_builder([False, True], "The Bathroom", False, ["kill", "bedroom"])
+
+
+def familyroom():
+    time.sleep(delay)
+    room_builder([False, True, True], "The Familyroom",
+                 False, ["kill", "office", "gym"])
+
+
+def office():
+    time.sleep(delay)
+    room_builder([False, True], "The Office", False, ["kill", "familyroom"])
+
+
+def gym():
+    time.sleep(delay)
+    room_builder([False, True], "The Gym", False, ["kill", "familyroom"])
+
+
+def room_builder(room_list, room_name, is_end_room, next_room):
+    #Room Introduction#
+    print(f"You have entered {room_name}.")
+    time.sleep(delay)
+    #Count The number of rooms#
+    room_count = len(room_list)
+    ##Door Choices##
+    choices = []
+    #Allow player to choose a door#
+    input_m = "Choose A Door: ("
+    #Add name of door to list with a message#
+    door_m = ""
+    for count in range(room_count):
+        # Adds to list
+        choices.append(f"door {count + 1}: ")
+        if count + 1 < room_count:
+            door_m += f"door {count + 1}, "
+
+        else:
+            door_m += f"door {count + 1}):"
+    # Add a door message to Input message
+    input_m += door_m
+    #To print messages slowly instead of all at once#
+    time.sleep(delay)
+
+    while True:
+        command = input(input_m)
+        #checks if player enters vaild command choice#
+        if command in choices:
+            if room_list[choices.index(command)]:
+                if is_end_room:
+                    time.sleep(delay)
+                    print("Wise Choice young one")
+                    win()
+                    break
+                else:
+                    time.sleep(delay)
+                    print("Prceed to next room")
+                    time.sleep(delay)
+                    eval(next_room[choices.index(command)] + "()")
+                    break
+            else:
+                kill()
+                break
+        else:
+            time.sleep(delay)
+            print("Sorry invaild response {door_m}")
+
+
+##Setting which rooms are safe to enter and which will kill you#
+room_builder([True, True, True], "The Entrance Hall",
+             False, ["kitchen", "bedroom", "office"])
