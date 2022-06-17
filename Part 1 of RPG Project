@@ -69,7 +69,7 @@ def game():
 
             if building1.lower() == "enter":
                 print()
-                print("You enter")
+                print("You enter")#Ideally this is where I would call in the second code to run 
             else:
                 print()
                 print("You decided to look around only to fall into a trap")
