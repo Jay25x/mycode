@@ -1,0 +1,73 @@
+from pickle import FALSE
+import pygame
+
+
+class Fighter():  # setting up of fighter class
+    def __init__(self, x, y):
+
+        ##Fighter Witdh & Height##
+        self.rect = pygame.Rect((x, y, 80, 180))
+        self.vel_y = 0
+        #Stop player from Jumping when already in air#
+        self.jump = False
+       # self.attack_type = 0
+
+    def move(self, screen_width, screen_height):  # movement of players##
+        SPEED = 10
+        GRAVITY = 2
+        dx = 0
+        dy = 0
+
+        ##Enables Key press Input##
+        key = pygame.key.get_pressed()
+
+        # movement
+        if key[pygame.K_a]:
+            dx = -SPEED  # Left Movement Fighter_1##
+        if key[pygame.K_s]:
+            dx = SPEED  # Right Movement Fighter_1##
+        #jump#
+        if key[pygame.K_w] and self.jump == False:
+            self.vel_y = -30
+            self.jump = True
+
+        #Attacks#
+   #     if key[pygame.K_r] or key[pygame.k_t]:
+          #      self.attack(surface)
+
+            ##Determine which attack is being used##
+           # if key[pygame.K_r]:
+            #    self.attack_type = 1
+          #  if key[pygame.K_t]:
+            #  self.attack_type = 2
+
+            #apply gravity so that player comes back down when jumpping##
+        self.vel_y += GRAVITY
+        dy += self.vel_y
+
+        ##Keeps Fighters from going off screen##
+        if self.rect.left + dx < 0:
+            dx = 0 - self.rect.left
+        if self.rect.right + dx > screen_width:
+            dx = screen_width - self.rect.right
+            # makes it so player doesnt fall through ground and starting height off ground##
+        if self.rect.bottom + dy > screen_height - 60:
+            self.vel_y = 0
+            # Reset Jump
+            self.jump = False
+            dy = screen_height - 60 - self.rect.bottom
+
+        ##Updates The Fighter Position##
+        self.rect.x += dx
+        self.rect.y += dy
+
+  #  def attack(self):
+        pass
+  #  def attack(self, surface):
+   #     attacking_rect = pygame.Rect(
+    #        self.rect.centerx, self.rect.y, 2 * self.rect.width, self.rect.height)
+     #   pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
+
+    ##Drawing of Fighters Function##
+    def draw(self, surface):
+        pygame.draw.rect(surface, (255, 0, 0), self.rect)
