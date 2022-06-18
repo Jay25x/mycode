@@ -10,7 +10,7 @@ class Fighter():  # setting up of fighter class
         self.vel_y = 0
         #Stop player from Jumping when already in air#
         self.jump = False
-       # self.attack_type = 0
+        self.attack_type = 0
 
     def move(self, screen_width, screen_height):  # movement of players##
         SPEED = 10
@@ -32,16 +32,14 @@ class Fighter():  # setting up of fighter class
             self.jump = True
 
         #Attacks#
-   #     if key[pygame.K_r] or key[pygame.k_t]:
-          #      self.attack(surface)
+        if key[pygame.K_r] or key[pygame.K_t]:
+            #Which Attack is being used#
+            if key[pygame.K_r]:
+                self.attack_type = 1
+            if key[pygame.K_t]:
+                self.attack_type = 2
 
-            ##Determine which attack is being used##
-           # if key[pygame.K_r]:
-            #    self.attack_type = 1
-          #  if key[pygame.K_t]:
-            #  self.attack_type = 2
-
-            #apply gravity so that player comes back down when jumpping##
+         #apply gravity so that player comes back down when jumpping##
         self.vel_y += GRAVITY
         dy += self.vel_y
 
@@ -61,12 +59,8 @@ class Fighter():  # setting up of fighter class
         self.rect.x += dx
         self.rect.y += dy
 
-  #  def attack(self):
+    def attack(self):
         pass
-  #  def attack(self, surface):
-   #     attacking_rect = pygame.Rect(
-    #        self.rect.centerx, self.rect.y, 2 * self.rect.width, self.rect.height)
-     #   pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
 
     ##Drawing of Fighters Function##
     def draw(self, surface):
