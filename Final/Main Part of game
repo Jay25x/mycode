@@ -16,6 +16,11 @@ pygame.display.set_caption("Brawler")
 clock = pygame.time.Clock()
 FPS = 60  # FramesPerSecond##
 
+#Define Colors#
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+WHITE = (255, 255, 255)
+
 ##Background Image load in and \\ to prevent error when pulling in iamge##
 bg_image = pygame.image.load(
     "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\images\\backgrounds\\background.jpg").convert_alpha()
@@ -26,6 +31,17 @@ def draw_bg():
     ## Resize Iamge to fit window size##
     scaled_bg = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_Height))
     screen.blit(scaled_bg, (0, 0))
+
+#Health Bars for fighters Function#
+
+
+def draw_health_bar(health, x, y):
+    ratio = health / 100  # Dynamic health #
+    pygame.draw.rect(screen, WHITE, (x - 5, y-5, 410, 40)
+                     )  # Health Bar Outline#
+    pygame.draw.rect(screen, RED, (x, y, 400, 30))
+    pygame.draw.rect(screen, YELLOW, (x, y, 400 * ratio, 30)
+                     )  # Dynamic Health Bar#
 
 
 ## Creates Fighters ##
@@ -42,9 +58,13 @@ while run:
     ##Background Drawing##
     draw_bg()
 
+    #Health Bars Diplay#
+    draw_health_bar(fighter_1.health, 20, 20)
+    draw_health_bar(fighter_2.health, 580, 20)
+
     ##Fighters Movements##
     # Calls in Move Function##
-    fighter_1.move(SCREEN_WIDTH, SCREEN_Height)
+    fighter_1.move(SCREEN_WIDTH, SCREEN_Height, screen, fighter_2)
     # fighter_2.move()
 
     ## drawing of fighters passing them into surface##
