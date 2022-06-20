@@ -3,24 +3,33 @@ import pygame
 
 
 class Fighter():  # setting up of fighter class
-    def __init__(self, x, y, data, sprite_sheet, animation_steps):
+    def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, sound):
+        self.player = player
         self.size = data[0]
         self.image_scale = data[1]
         self.offset = data[2]
-        self.flip = False
+        self.flip = flip
         self.animation_list = self.load_images(sprite_sheet, animation_steps)
         #Helps determine what the player is doing#
+        # (0: idle 1: run 2: jump 3: attack1 #4: attack 2 5: hit 6: death based on sprite sheet)
         self.action = 0
         self.frame_index = 0
         self.image = self.animation_list[self.action][self.frame_index]
+        #Sets animation speed of movements#
+        self.update_time = pygame.time.get_ticks()
         ##Fighter Witdh & Height##
         self.rect = pygame.Rect((x, y, 80, 180))
         self.vel_y = 0
+        self.running = False
         #Stop player from Jumping when already in air#
         self.jump = False
         self.attacking = False
         self.attack_type = 0
+        self.attack_cooldown = 0
+        self.attack_sound = sound
+        self.hit = False
         self.health = 100
+        self.alive = True
 
     def load_images(self, sprite_sheet, animation_steps):
         #Will extract images from the spritesheet#
@@ -35,35 +44,65 @@ class Fighter():  # setting up of fighter class
             animation_list.append(temp_img_list)
         return animation_list
 
-    def move(self, screen_width, screen_height, surface, target):  # movement of players##
+    def move(self, screen_width, screen_height, surface, target, roud_over):  # movement of players##
         SPEED = 10
         GRAVITY = 2
         dx = 0
         dy = 0
+        # Default Running
+        self.running = False
+        # Default Attacking
+        self.attack_type = 0
 
         ##Enables Key press Input##
         key = pygame.key.get_pressed()
 
-        #Stops other movement while attacking#
-        if self.attacking == False:
-            # movement
-            if key[pygame.K_a]:
-                dx = -SPEED  # Left Movement Fighter_1##
-            if key[pygame.K_s]:
-                dx = SPEED  # Right Movement Fighter_1##
-            #jump#
-            if key[pygame.K_w] and self.jump == False:
-                self.vel_y = -30
-                self.jump = True
+        #Stops other movement while attacking and stops movement once dead#
+        if self.attacking == False and self.alive == True and roud_over == False:
+            #Check the controls for Player1#
+            if self.player == 1:
+                # movement
+                if key[pygame.K_a]:
+                    dx = -SPEED  # Left Movement Fighter_1##
+                    self.running = True
+                if key[pygame.K_s]:
+                    dx = SPEED  # Right Movement Fighter_1##
+                    self.running = True
+                #jump#
+                if key[pygame.K_w] and self.jump == False:
+                    self.vel_y = -30
+                    self.jump = True
 
-            #Attacks#
-            if key[pygame.K_r] or key[pygame.K_t]:
-                self.attack(surface, target)
-                #Which Attack is being used#
-                if key[pygame.K_r]:
-                    self.attack_type = 1
-                if key[pygame.K_t]:
-                    self.attack_type = 2
+                #Attacks#
+                if key[pygame.K_r] or key[pygame.K_t]:
+                    self.attack(target)
+                    #Which Attack is being used#
+                    if key[pygame.K_r]:
+                        self.attack_type = 1
+                    if key[pygame.K_t]:
+                        self.attack_type = 2
+             #Check the controls for Player2#
+            if self.player == 2:
+                # movement
+                if key[pygame.K_LEFT]:
+                    dx = -SPEED  # Left Movement Fighter_2##
+                    self.running = True
+                if key[pygame.K_RIGHT]:
+                    dx = SPEED  # Right Movement Fighter_2##
+                    self.running = True
+                #jump#
+                if key[pygame.K_UP] and self.jump == False:
+                    self.vel_y = -30
+                    self.jump = True
+
+                #Attacks#
+                if key[pygame.K_KP1] or key[pygame.K_KP2]:
+                    self.attack(target)
+                    #Which Attack is being used#
+                    if key[pygame.K_KP1]:
+                        self.attack_type = 1
+                    if key[pygame.K_KP2]:
+                        self.attack_type = 2
 
          #apply gravity so that player comes back down when jumpping##
         self.vel_y += GRAVITY
@@ -75,11 +114,11 @@ class Fighter():  # setting up of fighter class
         if self.rect.right + dx > screen_width:
             dx = screen_width - self.rect.right
             # makes it so player doesnt fall through ground and starting height off ground##
-        if self.rect.bottom + dy > screen_height - 60:
+        if self.rect.bottom + dy > screen_height - 80:
             self.vel_y = 0
             # Reset Jump
             self.jump = False
-            dy = screen_height - 60 - self.rect.bottom
+            dy = screen_height - 80 - self.rect.bottom
 
         #Makes Sure that Fighters always face each other#
         if target.rect.centerx > self.rect.centerx:
@@ -87,27 +126,87 @@ class Fighter():  # setting up of fighter class
         else:
             self.flip = True
 
+        #Setting up timer for Attack cooldown#
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
+
         ##Updates The Fighter Position##
         self.rect.x += dx
         self.rect.y += dy
 
-    #Building attack area and creating collision decteion#
-    def attack(self, surface, target):
-        self.attacking = True
-        attacking_rect = pygame.Rect(
-            self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2 * self.rect.width, self.rect.height)
-        #Setting up attack collision dection#
-        if attacking_rect.colliderect(target.rect):
-            #Other fighter health drops when attacked#
-            target.health -= 10
+    #will update the animations that are happening#
+    def update(self):
+        #check what action is being performed by the player#
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
+            self.update_action(6)  # 6 = Death#
+        elif self.hit == True:
+            self.update_action(5)  # 5 = Hit#
+        elif self.attacking == True:
+            if self.attack_type == 1:
+                self.update_action(3)  # 3 = Attack1#
+            elif self.attack_type == 2:
+                self.update_action(4)  # 4 = Attack2#
+        elif self.jump == True:
+            self.update_action(2)  # 2 = Jump#
+        elif self.running == True:
+            self.update_action(1)  # 1 = Run#
+        # resets running animation
+        else:
+            self.update_action(0)  # 0 = idle#
+        animation_cooldown = 50
+        #updating of the image#
+        self.image = self.animation_list[self.action][self.frame_index]
+        # Will check the time between movement updates#
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+            self.frame_index += 1
+            self.update_time = pygame.time.get_ticks()
+        #will check if animation has completed it's cycle#
+        if self.frame_index >= len(self.animation_list[self.action]):
+            # Checks to see if player is dead#
+            if self.alive == False:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+            else:
+                self.frame_index = 0
+                #Checks for if attack was performed and reset animation#
+                if self.action == 3 or self.action == 4:
+                    self.attacking = False
+                    self.attack_cooldown = 20  # adds cool down so that player has to wait between attacks#
+                #chacks for any damage taken#
+                if self.action == 5:
+                    self.hit = False
+                    # Will stop attack if fighter is hit with attack #
+                    self.attacking = False
+                    self.attack_cooldown = 20
 
-        pygame.draw.rect(surface, (2, 255, 0), attacking_rect)
+    #Building attack area and creating collision decteion#
+    def attack(self, target):  # add in surface for testing Rect#
+        if self.attack_cooldown == 0:
+            self.attacking = True
+            self.attack_sound.play()
+            attacking_rect = pygame.Rect(
+                self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2 * self.rect.width, self.rect.height)
+            #Setting up attack collision dection#
+            if attacking_rect.colliderect(target.rect):
+                #Other fighter health drops when attacked#
+                target.health -= 10
+                target.hit = True
+            #pygame.draw.rect(surface, (2, 255, 0), attacking_rect) #Testing Rect Can Be removed#
+
+    def update_action(self, new_action):
+        # will check for the differences in actions#
+        if new_action != self.action:
+            self.action = new_action
+            # Animation settings update
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
 
     ##Drawing of Fighters Function##
     def draw(self, surface):
         #Make sure that iamges are facing each other#
         img = pygame.transform.flip(self.image, self.flip, False)
-        pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        #pygame.draw.rect(surface, (255, 0, 0), self.rect)# # Test Rect when building can be deleted #
         #Drawing iamges of fighters onto surface#
         surface.blit(img, (self.rect.x -
                      (self.offset[0] * self.image_scale), self.rect.y - (self.offset[1] * self.image_scale)))
