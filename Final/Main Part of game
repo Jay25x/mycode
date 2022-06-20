@@ -1,7 +1,9 @@
 from turtle import Screen  # allows for import of image to screen##
 import pygame  # enables visuals##
+from pygame import mixer  # allows for audio and sound effects##
 from fighter import Fighter  # brings in fighters ferom fighter file##
 
+mixer.init()
 pygame.init()  # creates an instances of pygame##
 
 ##Creates Game Window Size##
@@ -21,6 +23,13 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 
+# Game Variables
+intro_count = 3
+last_count_update = pygame.time.get_ticks()
+score = [0, 0]
+round_over = False
+Round_OVER_COOLDOWN = 2000
+
 # Will be used to define size of fighters #
 WARRIOR_SIZE = 162  # Number based off size of image#
 WARRIOR_SCALE = 4  # scales the size of the fighter#
@@ -30,6 +39,20 @@ WIZARD_SIZE = 250
 WIZARD_SCALE = 3
 WIZARD_OFFSET = [112, 107]
 WIZARD_DATA = [WIZARD_SIZE, WIZARD_SCALE, WIZARD_OFFSET]
+
+#Music and sound effects load in#
+pygame.mixer.music.load(
+    "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\audio\\assets_audio_music.mp3")
+# adjust starting volume when game starts up#
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1, 0.0, 5000)  # sets playback of music#
+sword_fx = pygame.mixer.Sound(
+    "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\audio\\assets_audio_sword.wav")
+sword_fx.set_volume(0.5)
+magic_fx = pygame.mixer.Sound(
+    "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\audio\\assets_audio_magic.wav")
+magic_fx.set_volume(0.5)
+
 
 ##Background Image load in and \\ to prevent error when pulling in iamge##
 bg_image = pygame.image.load(
@@ -41,9 +64,26 @@ warrior_sheet = pygame.image.load(
 wizard_sheet = pygame.image.load(
     "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\images\\wizard\\Sprites\\wizard.png").convert_alpha()
 
+#Vitory Image load in#
+victory_img = pygame.image.load(
+    "C:\\Users\\17737\\Desktop\\Python\\Game_Project\\brawler\\assets\\images\\icons\\victory.png").convert_alpha()
+
 #Fighters animation defined into a list istead of pulling each image separtely#
 WARRIOR_ANIMATION_STEPS = [10, 8, 1, 7, 7, 3, 7]
 WIZARD_ANIMATION_STEPS = [8, 8, 1, 8, 8, 3, 7]
+
+#Fonts#
+count_font = pygame.font.Font(
+    "Game_Project\\brawler\\assets\\images\\fonts\\turok.ttf", 80)
+score_font = pygame.font.Font(
+    "Game_Project\\brawler\\assets\\images\\fonts\\turok.ttf", 30)
+
+#Text Drawing Function#
+
+
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 ##Background Drawing Function##
 
@@ -66,10 +106,10 @@ def draw_health_bar(health, x, y):
 
 
 ## Creates Fighters ##
-fighter_1 = Fighter(200, 550, WARRIOR_DATA, warrior_sheet,
-                    WARRIOR_ANIMATION_STEPS)
-fighter_2 = Fighter(700, 550, WIZARD_DATA, wizard_sheet,
-                    WIZARD_ANIMATION_STEPS)
+fighter_1 = Fighter(1, 200, 550, False, WARRIOR_DATA, warrior_sheet,
+                    WARRIOR_ANIMATION_STEPS, sword_fx)
+fighter_2 = Fighter(2, 700, 550, True, WIZARD_DATA, wizard_sheet,
+                    WIZARD_ANIMATION_STEPS, magic_fx)
 
 ##game loop that keep screen from closing##
 run = True
@@ -81,18 +121,59 @@ while run:
     ##Background Drawing##
     draw_bg()
 
-    #Health Bars Diplay#
+    #Health Bars & Name Diplay#
     draw_health_bar(fighter_1.health, 20, 20)
     draw_health_bar(fighter_2.health, 580, 20)
+    draw_text("PLAYER1: " + str(score[0]), score_font, RED, 20, 60)
+    draw_text("PLAYER2: " + str(score[1]), score_font, RED, 580, 60)
 
-    ##Fighters Movements##
-    # Calls in Move Function##
-    fighter_1.move(SCREEN_WIDTH, SCREEN_Height, screen, fighter_2)
-    # fighter_2.move()
+    #Display countdown to start fight#
+    if intro_count <= 0:
+        ##Fighters Movements##
+        # Calls in Move Function##
+        fighter_1.move(SCREEN_WIDTH, SCREEN_Height,
+                       screen, fighter_2, round_over)
+        fighter_2.move(SCREEN_WIDTH, SCREEN_Height,
+                       screen, fighter_1, round_over)
+    else:
+        # Draws in Timer#
+        draw_text(str(intro_count), count_font, RED,
+                  SCREEN_WIDTH / 2, SCREEN_Height / 3)
+        # Make players for movement until countdown has ended#
+        if (pygame.time.get_ticks() - last_count_update) >= 1000:
+            intro_count -= 1
+            last_count_update = pygame.time.get_ticks()
+            print(intro_count)
+
+    #updates the fighters for animated movement#
+    fighter_1.update()
+    fighter_2.update()
 
     ## drawing of fighters passing them into surface##
     fighter_1.draw(screen)
     fighter_2.draw(screen)
+
+    # Player defeat check#
+    if round_over == False:
+        if fighter_1.alive == False:
+            score[1] += 1
+            round_over = True
+            round_over_time = pygame.time.get_ticks()
+        elif fighter_2.alive == False:
+            score[0] += 1
+            round_over = True
+            round_over_time = pygame.time.get_ticks()
+    else:
+        #Victory Diplay#
+        screen.blit(victory_img, (360, 150))
+        if pygame.time.get_ticks() - round_over_time > Round_OVER_COOLDOWN:
+            round_over = False
+            intro_count = 3
+            # Will reset the fighter to start new round#
+            fighter_1 = Fighter(1, 200, 550, False, WARRIOR_DATA,
+                                warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
+            fighter_2 = Fighter(2, 700, 550, True, WIZARD_DATA,
+                                wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
 
     # event handler
     for event in pygame.event.get():
